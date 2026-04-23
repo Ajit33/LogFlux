@@ -1,5 +1,4 @@
 import elastic from "../../config/elasticsearch";
-import logger from "../../config/logger";
 import { Log } from "../logs/log.types";
 import { SearchQuery, SearchResult } from "./search.types";
 
@@ -91,6 +90,7 @@ export class SearchService {
       total,
       page,
       limit,
+      pages: Math.ceil(total / limit),
       logs: response.hits.hits.map((hit) => ({
         id: hit._id,
         ...hit._source,

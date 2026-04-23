@@ -18,5 +18,6 @@ export interface SearchResult {
   total: number;
   page: number;
   limit: number;
+  pages:number;
   logs: object[];
 }

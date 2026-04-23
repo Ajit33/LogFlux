@@ -11,7 +11,7 @@ import elastic from "./config/elasticsearch";
 
 import logRoutes from "./modules/logs/log.routes";
 import searchRoutes from "./modules/search/search.routes"
-
+import authRoutes from "./modules/auth/auth.routes"
 const app = express();
 
 /**
@@ -71,6 +71,7 @@ app.get("/", (req, res) => {
  */
 app.use("/logs", logRoutes);
 app.use("/search", searchRoutes);
+app.use("/auth",authRoutes)
 /**
  * 404 Handler
  */
@@ -112,7 +113,7 @@ async function startServer() {
     await initializeConnections();
 
     const server = app.listen(config.port, () => {
-      logger.info(`🚀 Server started on port ${config.port}`);
+      logger.info(`Server started on port ${config.port}`);
       logger.info(`Environment: ${config.nodeEnv}`);
     });
 
