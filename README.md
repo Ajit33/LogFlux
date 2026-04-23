@@ -1,12 +1,12 @@
-markdown# LogStream — Log Ingestion & Query System
+# LogStream — Log Ingestion & Query System
 
 A high-throughput log ingestion and query system built with Node.js, Elasticsearch, Redis, BullMQ, React, and Docker.
 
 ## Architecture
-POST /logs → Redis Queue (BullMQ) → Worker (batch flush) → Elasticsearch
 ↑
-GET  /search ──────────────────────────────────────────────────┘
-GET  /logs/stream (SSE) ← real-time broadcast
+POST /logs → Redis Queue (BullMQ) → Worker → Elasticsearch  
+GET  /search → Elasticsearch  
+GET  /logs/stream → SSE (real-time)
 
 ### Stack
 - **Backend** — Node.js + Express + TypeScript
@@ -211,6 +211,8 @@ Tested with 200 concurrent users over 5 minutes:
 ✅ 28,560 total requests processed
 
 ## Project Structure
+
+```bash
 log-system/
 ├── backend/
 │   ├── src/
@@ -273,6 +275,7 @@ log-system/
 ├── seed.js
 ├── docker-compose.yml
 └── README.md
+```
 
 ## Environment Variables
 
