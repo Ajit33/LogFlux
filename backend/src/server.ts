@@ -10,6 +10,7 @@ import redis from "./config/redis";
 import elastic from "./config/elasticsearch";
 
 import logRoutes from "./modules/logs/log.routes";
+import searchRoutes from "./modules/search/search.routes"
 
 const app = express();
 
@@ -69,7 +70,7 @@ app.get("/", (req, res) => {
  * ─────────────────────────────
  */
 app.use("/logs", logRoutes);
-
+app.use("/search", searchRoutes);
 /**
  * 404 Handler
  */

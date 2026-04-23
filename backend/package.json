@@ -4,16 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "worker": "ts-node-dev --respawn --transpile-only src/worker.ts"
-},
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "worker": "ts-node-dev --respawn --transpile-only src/worker/logWorker.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@elastic/elasticsearch": "^9.3.4",
+    "@elastic/elasticsearch": "^8.13.0",
     "@types/cors": "^2.8.19",
     "@types/ioredis": "^4.28.10",
     "bull": "^4.16.5",
