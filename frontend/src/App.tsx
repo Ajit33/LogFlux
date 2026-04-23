@@ -1,121 +1,102 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+import { TopBar }     from "./components/TopBar";
+import { Sidebar }    from "./components/Sidebar";
+import { LogTable }   from "./components/LogTable";
+import { DetailPanel} from "./components/DetailPanel";
+import { LoginPage }  from "./pages/LoginPage";
+import { UsersPage }  from "./pages/UserPage";        // ← add this
+import { useSearch }  from "./hooks/useSearch";
+import { useRealtime} from "./hooks/useRealtime";
+import type { LogEntry, User, SearchParams } from "./types";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [user, setUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [showUsers, setShowUsers] = useState(false);   // ← add this
+
+  const handleLogin = (u: User, token: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(u));
+    setUser(u);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  const { result, loading, error, liveMode, setLiveMode, updateParam, setPage, clearFilters } = useSearch();
+  const { newLogs, newIds, clearNew } = useRealtime(liveMode);
+  const [selected, setSelected] = useState<LogEntry | null>(null);
+
+  const displayLogs = liveMode && newLogs.length > 0
+    ? [...newLogs, ...(result?.logs ?? [])].slice(0, result?.limit ?? 50)
+    : (result?.logs ?? []);
+
+  const handleSearch = (params: Partial<SearchParams>) => {
+    Object.entries(params).forEach(([k, v]) => updateParam(k as keyof SearchParams, v));
+    clearNew();
+  };
+
+  if (!user) return <LoginPage onLogin={handleLogin} />;
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#010409", color: "#c9d1d9", fontFamily: "monospace", overflow: "hidden" }}>
+      <TopBar
+        total={result?.total ?? 0}
+        loading={loading}
+        liveMode={liveMode}
+        onToggleLive={() => setLiveMode(!liveMode)}
+        user={user}
+        onLogout={handleLogout}
+        newCount={newLogs.length}
+        onManageUsers={() => setShowUsers(true)}   // ← add this
+      />
 
-      <div className="ticks"></div>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <Sidebar
+          onSearch={handleSearch}
+          onClear={clearFilters}
+          role={user.role}
+        />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <LogTable
+          logs={displayLogs}
+          total={result?.total ?? 0}
+          page={result?.page ?? 1}
+          pages={result?.pages ?? 1}
+          loading={loading}
+          error={error}
+          newIds={newIds}
+          selected={selected}
+          onSelect={setSelected}
+          onPage={setPage}
+        />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {selected && <DetailPanel log={selected} onClose={() => setSelected(null)} />}
+      </div>
+
+      {/* Users modal */}
+      {showUsers && (                               
+        <UsersPage
+          currentUser={user}
+          onClose={() => setShowUsers(false)}
+        />
+      )}
+
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:#0d1117}
+        ::-webkit-scrollbar-thumb{background:#21262d;border-radius:3px}
+        *{box-sizing:border-box}
+        body{margin:0}
+        select option{background:#0d1117}
+      `}</style>
+    </div>
+  );
 }
-
-export default App
