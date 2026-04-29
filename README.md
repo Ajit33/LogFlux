@@ -3,10 +3,13 @@
 A high-throughput log ingestion and query system built with Node.js, Elasticsearch, Redis, BullMQ, React, and Docker.
 
 ## Architecture
-↑
+<img width="1414" height="682" alt="image" src="https://github.com/user-attachments/assets/9b2cf2de-5a2e-4698-9ba3-f21d945a8655" />
+
 POST /logs → Redis Queue (BullMQ) → Worker → Elasticsearch  
 GET  /search → Elasticsearch  
 GET  /logs/stream → SSE (real-time)
+## k6 test result
+<img width="1296" height="930" alt="Screenshot 2026-04-24 010658" src="https://github.com/user-attachments/assets/30f40152-5d26-49fb-8cf2-5ad6afe3fc1b" />
 
 ### Stack
 - **Backend** — Node.js + Express + TypeScript
@@ -301,4 +304,4 @@ log-system/
 | worker | custom | — |
 | frontend | custom | 5173 |
 | elasticsearch | 8.13.4 | 9200 |
-| redis | 7-alpine | 6379 |
+| redis | 7-alpine | 6379 
